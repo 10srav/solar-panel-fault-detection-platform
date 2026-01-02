@@ -56,14 +56,41 @@ A production-ready, explainable AI system for detecting and classifying faults i
 - Docker & Docker Compose (for containerized deployment)
 - CUDA 11.8+ (optional, for GPU training)
 
-## Quick Start
+## Quick Start (Demo Mode)
+
+Run the platform in demo mode without trained models:
+
+```bash
+# Clone and install
+git clone https://github.com/10srav/solar-panel-fault-detection-platform.git
+cd solar-panel-fault-detection-platform
+python -m venv .venv
+.venv\Scripts\activate  # On Linux/Mac: source .venv/bin/activate
+pip install -e ".[dev]"
+
+# Run API server (demo mode - returns mock inference results)
+python run_api.py
+
+# In another terminal, run frontend
+cd src/frontend
+npm install
+npm run dev
+
+# Access the application:
+# - Frontend: http://localhost:3000
+# - API Docs: http://localhost:8000/docs
+```
+
+Demo mode automatically activates when models aren't loaded, returning realistic mock predictions for testing the UI.
+
+## Full Setup
 
 ### 1. Clone and Setup Environment
 
 ```bash
 # Clone the repository
-git clone https://github.com/your-org/solar-panel-fault-detection.git
-cd solar-panel-fault-detection
+git clone https://github.com/10srav/solar-panel-fault-detection-platform.git
+cd solar-panel-fault-detection-platform
 
 # Create Python virtual environment
 python -m venv venv
@@ -190,17 +217,26 @@ Generates:
 
 #### Run Ablation Studies
 
-```bash
-# Ablation on Fire Module configurations
-python scripts/ablation.py fire-modules \
-    --config config/local.yaml \
-    --output-dir outputs/ablation
+Compare SparkNet's end-to-end classification with traditional ML classifiers (Random Forest, XGBoost) using extracted features:
 
-# Ablation on severity scoring weights
-python scripts/ablation.py severity-weights \
+```bash
+# Train SparkNet with ablation study
+python scripts/train_sparknet.py \
     --config config/local.yaml \
-    --output-dir outputs/ablation
+    --train-dir data/rgb/train \
+    --val-dir data/rgb/val \
+    --test-dir data/rgb/test \
+    --run-ablation \
+    --output-dir outputs/sparknet
+
+# Results saved to:
+#   - outputs/sparknet/ablation_results.json
+#   - outputs/sparknet/ablation_report.txt
+#   - outputs/sparknet/randomforest_classifier.pkl
+#   - outputs/sparknet/xgboost_classifier.pkl
 ```
+
+The ablation study extracts features from SparkNet's penultimate layer and trains RF/XGBoost classifiers, allowing comparison of deep learning vs traditional ML approaches.
 
 ### 6. Start API Server
 

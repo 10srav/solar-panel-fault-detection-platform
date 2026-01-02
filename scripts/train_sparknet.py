@@ -1,18 +1,125 @@
 #!/usr/bin/env python
-"""Training script for SparkNet RGB classification model."""
+"""Training script for SparkNet RGB classification model with ablation study support."""
 
 from __future__ import annotations
 
 import argparse
 import json
+import logging
+from datetime import datetime
 from pathlib import Path
 
+import numpy as np
 import torch
 
 from src.config import load_config, Config
 from src.data.dataloader import create_rgb_dataloaders
 from src.models.sparknet import SparkNet
 from src.training.trainer import SparkNetTrainer
+
+# Optional imports for ablation study
+try:
+    from src.models.ablation_classifiers import (
+        AblationStudy,
+        SKLEARN_AVAILABLE,
+        XGBOOST_AVAILABLE,
+    )
+    ABLATION_AVAILABLE = SKLEARN_AVAILABLE or XGBOOST_AVAILABLE
+except ImportError:
+    ABLATION_AVAILABLE = False
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(levelname)s - %(message)s"
+)
+logger = logging.getLogger(__name__)
+
+
+def extract_features(
+    model: SparkNet,
+    dataloader,
+    device: torch.device,
+) -> tuple:
+    """Extract features from all images using SparkNet.
+
+    Returns:
+        Tuple of (features, labels)
+    """
+    model.eval()
+    all_features = []
+    all_labels = []
+
+    with torch.no_grad():
+        for images, labels in dataloader:
+            images = images.to(device)
+            features = model.get_features(images)
+            all_features.append(features.cpu().numpy())
+            all_labels.extend(labels.numpy())
+
+    return np.concatenate(all_features, axis=0), np.array(all_labels)
+
+
+def run_ablation_study(
+    model: SparkNet,
+    dataloaders: dict,
+    device: torch.device,
+    output_dir: Path,
+    sparknet_test_accuracy: float = None,
+) -> dict:
+    """Run ablation study comparing SparkNet with RF/XGBoost.
+
+    Args:
+        model: Trained SparkNet model
+        dataloaders: Dictionary with train/val/test dataloaders
+        device: PyTorch device
+        output_dir: Directory to save results
+        sparknet_test_accuracy: SparkNet test accuracy for comparison
+
+    Returns:
+        Dictionary of ablation study results
+    """
+    logger.info("Extracting features for ablation study...")
+
+    # Extract features
+    train_features, train_labels = extract_features(model, dataloaders["train"], device)
+    val_features, val_labels = extract_features(model, dataloaders["val"], device)
+
+    test_features, test_labels = None, None
+    if "test" in dataloaders:
+        test_features, test_labels = extract_features(model, dataloaders["test"], device)
+    else:
+        # Use validation as test if no test set
+        test_features, test_labels = val_features, val_labels
+
+    logger.info(f"Feature dimensions: {train_features.shape}")
+
+    # Run ablation study
+    study = AblationStudy()
+    results = study.run_study(
+        train_features,
+        train_labels,
+        test_features,
+        test_labels,
+        validation_data=(val_features, val_labels),
+    )
+
+    # Generate comparison report
+    report = study.compare_results(results, sparknet_accuracy=sparknet_test_accuracy)
+    logger.info("\n" + report)
+
+    # Save results
+    study.save_results(results, output_dir / "ablation_results.json")
+
+    # Save report
+    with open(output_dir / "ablation_report.txt", "w") as f:
+        f.write(report)
+
+    # Save trained classifiers
+    for name, classifier in study.classifiers.items():
+        classifier.save(output_dir / f"{name.lower()}_classifier.pkl")
+        logger.info(f"Saved {name} classifier to {output_dir / f'{name.lower()}_classifier.pkl'}")
+
+    return results
 
 
 def parse_args() -> argparse.Namespace:
@@ -86,6 +193,17 @@ def parse_args() -> argparse.Namespace:
         default="cuda",
         choices=["cuda", "cpu"],
         help="Device to train on",
+    )
+    parser.add_argument(
+        "--run-ablation",
+        action="store_true",
+        help="Run ablation study comparing SparkNet with RF/XGBoost",
+    )
+    parser.add_argument(
+        "--experiment-name",
+        type=str,
+        default=None,
+        help="Experiment name for logging (default: timestamp)",
     )
 
     return parser.parse_args()
@@ -176,17 +294,36 @@ def main() -> None:
     print(f"Saved training history to {history_path}")
 
     # Evaluate on test set if provided
+    test_accuracy = None
     if args.test_dir and "test" in dataloaders:
         print("\nEvaluating on test set...")
         test_metrics = trainer.validate(dataloaders["test"])
         print(f"Test Results:")
         for name, value in test_metrics.items():
             print(f"  {name}: {value:.4f}")
+        test_accuracy = test_metrics.get("accuracy", test_metrics.get("val_accuracy"))
 
         # Save test results
         test_path = output_dir / "test_results.json"
         with open(test_path, "w") as f:
             json.dump(test_metrics, f, indent=2)
+
+    # Run ablation study if requested
+    if args.run_ablation:
+        if ABLATION_AVAILABLE:
+            logger.info("\nRunning ablation study...")
+            ablation_results = run_ablation_study(
+                model=model,
+                dataloaders=dataloaders,
+                device=device,
+                output_dir=output_dir,
+                sparknet_test_accuracy=test_accuracy,
+            )
+        else:
+            logger.warning(
+                "Ablation study requires scikit-learn or xgboost. "
+                "Install with: pip install scikit-learn xgboost"
+            )
 
     print("\nTraining complete!")
 
