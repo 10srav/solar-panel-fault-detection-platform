@@ -1,0 +1,145 @@
+# Solar Panel Fault Detection - Default Configuration
+
+# Data paths
+data:
+  rgb:
+    train_dir: "data/rgb/train"
+    val_dir: "data/rgb/val"
+    test_dir: "data/rgb/test"
+  thermal:
+    train_images: "data/thermal/train/images"
+    train_masks: "data/thermal/train/masks"
+    val_images: "data/thermal/val/images"
+    val_masks: "data/thermal/val/masks"
+  split_ratio:
+    train: 0.6
+    val: 0.2
+    test: 0.2
+
+# Fault classes for RGB classification
+classes:
+  - "Clean"
+  - "Dusty"
+  - "Bird-drop"
+  - "Electrical-damage"
+  - "Physical-damage"
+  - "Snow-Covered"
+
+# SparkNet (RGB Classification) hyperparameters
+sparknet:
+  input_size: [227, 227]
+  num_classes: 6
+  dropout_rate: 0.5
+  fire_modules:
+    fire2_3:
+      squeeze_planes: 16
+      expand_planes: 64
+    fire4_5:
+      squeeze_planes: 32
+      expand_planes: 128
+    fire6_9:
+      squeeze_planes: 48
+      expand_planes: 192
+
+# U-Net (Thermal Segmentation) hyperparameters
+unet:
+  input_channels: 1
+  output_channels: 1
+  input_size: [256, 256]
+  features: [64, 128, 256, 512]
+
+# Training parameters
+training:
+  epochs: 300
+  batch_size: 64
+  learning_rate: 1.0e-4
+  lr_scheduler:
+    type: "step"
+    step_size: 23
+    gamma: 0.1
+  optimizer:
+    type: "adam"
+    betas: [0.9, 0.999]
+    weight_decay: 0.0
+  early_stopping:
+    patience: 30
+    min_delta: 0.001
+  mixed_precision: true
+  num_workers: 4
+  pin_memory: true
+
+# Augmentation settings
+augmentation:
+  enabled: true
+  rotation_range: 15
+  horizontal_flip: true
+  vertical_flip: true
+  brightness_range: [0.8, 1.2]
+  contrast_range: [0.8, 1.2]
+  affine_scale: [0.9, 1.1]
+
+# Severity scoring configuration
+severity:
+  weights:
+    fault_area: 0.4
+    temperature: 0.4
+    growth_rate: 0.2
+  thresholds:
+    low: 0.3
+    high: 0.7
+  temperature:
+    normalize_min: 20.0
+    normalize_max: 80.0
+
+# Model checkpoints
+checkpoints:
+  save_dir: "checkpoints"
+  save_best_only: true
+  metric: "val_f1"
+
+# Logging
+logging:
+  level: "INFO"
+  format: "json"
+  log_dir: "logs"
+
+# API configuration
+api:
+  host: "0.0.0.0"
+  port: 8000
+  workers: 4
+  cors_origins:
+    - "http://localhost:3000"
+    - "http://localhost:8080"
+
+# Database
+database:
+  url: "postgresql://postgres:postgres@localhost:5432/solar_detection"
+  pool_size: 10
+  max_overflow: 20
+
+# Object storage (S3-compatible)
+storage:
+  endpoint: "http://localhost:9000"
+  bucket: "solar-detection"
+  access_key: "${MINIO_ACCESS_KEY}"
+  secret_key: "${MINIO_SECRET_KEY}"
+  region: "us-east-1"
+
+# Alerting
+alerting:
+  enabled: true
+  high_risk_threshold: "High"
+  channels:
+    email:
+      enabled: false
+      smtp_host: "smtp.example.com"
+      smtp_port: 587
+    webhook:
+      enabled: true
+      url: "${WEBHOOK_URL}"
+
+# Prometheus metrics
+metrics:
+  enabled: true
+  endpoint: "/metrics"
