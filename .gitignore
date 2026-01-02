@@ -75,3 +75,6 @@ src/frontend/dist/
 # Test images
 test_*.png
 test_*.jpg
+gradcam_overlay.png
+mask_overlay.png
+solar_detection.db
