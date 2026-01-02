@@ -1,0 +1,65 @@
+# Alert rules for Solar Panel Fault Detection Platform
+
+groups:
+  - name: solar-detection-alerts
+    rules:
+      # API availability alert
+      - alert: APIDown
+        expr: up{job="solar-detection-api"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Solar Detection API is down"
+          description: "The Solar Detection API has been unreachable for more than 1 minute."
+
+      # High error rate alert
+      - alert: HighErrorRate
+        expr: |
+          rate(solar_detection_requests_total{status=~"5.."}[5m])
+          / rate(solar_detection_requests_total[5m]) > 0.05
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High error rate detected"
+          description: "More than 5% of requests are failing in the last 5 minutes."
+
+      # Slow inference latency
+      - alert: SlowInference
+        expr: |
+          histogram_quantile(0.95,
+            rate(solar_detection_request_latency_seconds_bucket{endpoint=~"/infer/.*"}[5m])
+          ) > 5
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Slow inference latency"
+          description: "95th percentile inference latency is above 5 seconds."
+
+      # High memory usage (if node_exporter is available)
+      - alert: HighMemoryUsage
+        expr: |
+          (node_memory_MemTotal_bytes - node_memory_MemAvailable_bytes)
+          / node_memory_MemTotal_bytes > 0.9
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High memory usage"
+          description: "Memory usage is above 90%."
+
+  - name: fault-detection-alerts
+    rules:
+      # High risk fault detection rate
+      - alert: HighRiskFaultRate
+        expr: |
+          rate(solar_detection_inferences_total{result="High"}[1h])
+          / rate(solar_detection_inferences_total[1h]) > 0.3
+        for: 30m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High rate of critical faults detected"
+          description: "More than 30% of detections are high-risk in the last hour."

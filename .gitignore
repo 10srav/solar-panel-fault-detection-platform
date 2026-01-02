@@ -71,3 +71,7 @@ logs/
 node_modules/
 src/frontend/node_modules/
 src/frontend/dist/
+
+# Test images
+test_*.png
+test_*.jpg
