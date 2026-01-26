@@ -10,7 +10,7 @@ from typing import Any, Optional
 import numpy as np
 import torch
 import torch.nn as nn
-from torch.cuda.amp import GradScaler, autocast
+from torch.amp import GradScaler, autocast
 from torch.utils.data import DataLoader
 from tqdm import tqdm
 
@@ -56,7 +56,7 @@ class Trainer:
 
         # Mixed precision training
         self.use_amp = self.config.training.mixed_precision and self.device.type == "cuda"
-        self.scaler = GradScaler() if self.use_amp else None
+        self.scaler = GradScaler("cuda") if self.use_amp else None
 
         # Callbacks
         self.early_stopping = EarlyStopping(
@@ -184,25 +184,25 @@ class SparkNetTrainer(Trainer):
     ) -> None:
         config = config or get_config()
 
-        # Default criterion
+        # Default criterion with label smoothing for better generalization
         if criterion is None:
-            criterion = nn.CrossEntropyLoss()
+            criterion = nn.CrossEntropyLoss(label_smoothing=0.1)
 
-        # Default optimizer
+        # Default optimizer with weight decay for regularization
         if optimizer is None:
-            optimizer = torch.optim.Adam(
+            optimizer = torch.optim.AdamW(
                 model.parameters(),
                 lr=config.training.learning_rate,
                 betas=tuple(config.training.optimizer.betas),
-                weight_decay=config.training.optimizer.weight_decay,
+                weight_decay=1e-4,
             )
 
-        # Default scheduler
+        # Default scheduler - Cosine Annealing for better convergence
         if scheduler is None:
-            scheduler = torch.optim.lr_scheduler.StepLR(
+            scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(
                 optimizer,
-                step_size=config.training.lr_scheduler.step_size,
-                gamma=config.training.lr_scheduler.gamma,
+                T_max=config.training.epochs,
+                eta_min=1e-6,
             )
 
         super().__init__(model, criterion, optimizer, scheduler, device, config)
@@ -231,7 +231,7 @@ class SparkNetTrainer(Trainer):
             self.optimizer.zero_grad()
 
             if self.use_amp:
-                with autocast():
+                with autocast("cuda"):
                     outputs = self.model(images)
                     loss = self.criterion(outputs, labels)
                 self.scaler.scale(loss).backward()
@@ -278,7 +278,7 @@ class SparkNetTrainer(Trainer):
                 labels = labels.to(self.device)
 
                 if self.use_amp:
-                    with autocast():
+                    with autocast("cuda"):
                         outputs = self.model(images)
                         loss = self.criterion(outputs, labels)
                 else:
@@ -407,7 +407,7 @@ class UNetTrainer(Trainer):
             self.optimizer.zero_grad()
 
             if self.use_amp:
-                with autocast():
+                with autocast("cuda"):
                     outputs = self.model(images)
                     loss = self.criterion(outputs, masks)
                 self.scaler.scale(loss).backward()
@@ -446,7 +446,7 @@ class UNetTrainer(Trainer):
                 masks = masks.to(self.device)
 
                 if self.use_amp:
-                    with autocast():
+                    with autocast("cuda"):
                         outputs = self.model(images)
                         loss = self.criterion(outputs, masks)
                 else:

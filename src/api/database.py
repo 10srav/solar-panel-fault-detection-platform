@@ -163,11 +163,8 @@ class DatabaseManager:
         # Create async engine and session factory
         try:
             if self.is_sqlite:
-                # SQLite async needs special handling
-                self.async_engine = create_async_engine(
-                    self.async_url,
-                    connect_args={"check_same_thread": False}
-                )
+                # SQLite async with aiosqlite - no connect_args needed
+                self.async_engine = create_async_engine(self.async_url)
             else:
                 self.async_engine = create_async_engine(self.async_url)
 
@@ -176,7 +173,9 @@ class DatabaseManager:
                 class_=AsyncSession,
                 expire_on_commit=False,
             )
-        except Exception:
+        except Exception as e:
+            import logging
+            logging.warning(f"Failed to create async engine: {e}")
             self.async_engine = None
             self.async_session_factory = None
 

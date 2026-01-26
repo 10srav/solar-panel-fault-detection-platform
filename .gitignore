@@ -56,12 +56,16 @@ nul
 *.pth
 *.pt
 *.onnx
-data/
+# data/  # REMOVED - Dataset should be included in repo
 checkpoints/
 models/*.pth
 outputs/
 logs/
 *.db
+
+# Large files that shouldn't be committed (but keep dataset structure)
+data/processed/
+data/cache/
 
 # Environment
 .env

@@ -280,7 +280,6 @@ class XGBoostAblation(AblationClassifier):
             colsample_bytree=colsample_bytree,
             random_state=random_state,
             n_jobs=-1,
-            use_label_encoder=False,
             eval_metric="mlogloss",
         )
 

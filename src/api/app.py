@@ -16,7 +16,7 @@ import structlog
 
 from src.api.routers import inference, panels
 from src.api.schemas import ErrorResponse, HealthResponse
-from src.api.database import get_db_manager
+from src.api.database import get_db_manager, init_db
 from src.config import Config, get_config
 from src.inference.pipeline import InferencePipeline
 
@@ -70,6 +70,15 @@ async def lifespan(app: FastAPI):
 
     _config = get_config()
     logger.info("Starting Solar Panel Fault Detection API")
+
+    # Initialize database (use SQLite for local development)
+    import os
+    db_url = os.environ.get("DATABASE_URL", "sqlite:///solar_detection.db")
+    try:
+        init_db(db_url)
+        logger.info("Database initialized", url=db_url)
+    except Exception as e:
+        logger.warning(f"Database initialization failed: {e}")
 
     # Initialize inference pipeline
     sparknet_path = Path(_config.checkpoints.save_dir) / "sparknet_best.pth"
@@ -213,14 +222,19 @@ def create_app(config: Optional[Config] = None) -> FastAPI:
         # Check database connection
         database_connected = False
         try:
+            from sqlalchemy import text
             db_manager = get_db_manager()
+            logger.info(f"DB URL: {db_manager.database_url}")
+            logger.info(f"Sync session factory: {db_manager.sync_session_factory}")
             # Try to get a session and execute a simple query
             session = db_manager.sync_session_factory()
-            session.execute("SELECT 1")
+            session.execute(text("SELECT 1"))
             session.close()
             database_connected = True
         except Exception as e:
+            import traceback
             logger.warning(f"Database health check failed: {e}")
+            logger.warning(f"Traceback: {traceback.format_exc()}")
 
         return HealthResponse(
             status="healthy" if database_connected else "degraded",

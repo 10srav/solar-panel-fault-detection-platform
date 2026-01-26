@@ -114,7 +114,7 @@ api:
 
 # Database
 database:
-  url: "postgresql://postgres:postgres@localhost:5432/solar_detection"
+  url: "sqlite:///C:/Users/polli/Downloads/solar-detection/solar-panel-fault-detection-platform/solar_detection.db"
   pool_size: 10
   max_overflow: 20
 
