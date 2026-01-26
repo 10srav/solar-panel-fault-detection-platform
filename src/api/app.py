@@ -16,6 +16,7 @@ import structlog
 
 from src.api.routers import inference, panels
 from src.api.schemas import ErrorResponse, HealthResponse
+from src.api.database import get_db_manager
 from src.config import Config, get_config
 from src.inference.pipeline import InferencePipeline
 
@@ -209,11 +210,23 @@ def create_app(config: Optional[Config] = None) -> FastAPI:
             "unet": _pipeline.unet is not None if _pipeline else False,
         }
 
+        # Check database connection
+        database_connected = False
+        try:
+            db_manager = get_db_manager()
+            # Try to get a session and execute a simple query
+            session = db_manager.sync_session_factory()
+            session.execute("SELECT 1")
+            session.close()
+            database_connected = True
+        except Exception as e:
+            logger.warning(f"Database health check failed: {e}")
+
         return HealthResponse(
-            status="healthy",
+            status="healthy" if database_connected else "degraded",
             version="1.0.0",
             models_loaded=models_loaded,
-            database_connected=True,  # TODO: Implement actual check
+            database_connected=database_connected,
         )
 
     # Prometheus metrics endpoint

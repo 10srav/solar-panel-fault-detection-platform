@@ -57,6 +57,7 @@ nul
 *.pt
 *.onnx
 data/
+checkpoints/
 models/*.pth
 outputs/
 logs/

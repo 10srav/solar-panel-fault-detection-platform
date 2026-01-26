@@ -141,7 +141,7 @@ class InferencePipeline:
             dropout_rate=self.config.sparknet.dropout_rate,
         )
 
-        checkpoint = torch.load(path, map_location=self.device)
+        checkpoint = torch.load(path, map_location=self.device, weights_only=False)
         if "model_state_dict" in checkpoint:
             self.sparknet.load_state_dict(checkpoint["model_state_dict"])
         else:
@@ -165,7 +165,7 @@ class InferencePipeline:
             features=self.config.unet.features,
         )
 
-        checkpoint = torch.load(path, map_location=self.device)
+        checkpoint = torch.load(path, map_location=self.device, weights_only=False)
         if "model_state_dict" in checkpoint:
             self.unet.load_state_dict(checkpoint["model_state_dict"])
         else:
