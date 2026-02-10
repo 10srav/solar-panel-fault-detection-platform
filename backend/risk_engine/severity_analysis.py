@@ -196,6 +196,105 @@ def full_risk_analysis(
 
 
 # ============================================================================
+# THERMAL-SPECIFIC RISK CLASSIFICATION
+# ============================================================================
+
+def classify_thermal_risk(fault_area_percent: float) -> str:
+    """
+    Risk classification for thermal imaging — calibrated for precise U-Net output.
+
+    Real thermal faults are small hotspots (2-12%), not large panel failures.
+    Thresholds tuned for Dice ~0.60 model that produces tight, accurate masks:
+        - Area >= 12%  → Critical  (multiple hotspots / panel degradation)
+        - Area 6-12%   → High      (significant anomaly cluster)
+        - Area 3-6%    → Medium    (developing hotspot)
+        - Area < 3%    → Low       (minor variation)
+    """
+    if fault_area_percent >= 12:
+        return "Critical"
+    elif fault_area_percent >= 6:
+        return "High"
+    elif fault_area_percent >= 3:
+        return "Medium"
+    else:
+        return "Low"
+
+
+def thermal_risk_analysis(fault_area_percent: float, heat_difference: float = 0.0) -> dict:
+    """
+    Complete risk analysis for thermal segmentation results.
+
+    Thermal module is ADVISORY — calibrated for precise U-Net masks.
+    Thermal hotspots are small but significant; thresholds are sensitive.
+
+    Args:
+        fault_area_percent: percentage from U-Net segmentation mask
+        heat_difference: mask_mean_intensity - image_mean_intensity
+                         Provided for diagnostic display; does NOT reduce severity
+                         (thresholds already account for model precision).
+
+    Returns:
+        dict with severity_score, risk_level, suggestion, alert
+    """
+    # Severity score = raw area (no reduction — thresholds already calibrated)
+    severity_score = fault_area_percent
+
+    # Risk classification (area-based, sensitive to small hotspots)
+    risk_level = classify_thermal_risk(fault_area_percent)
+
+    # Suggestions matched to thermal-specific thresholds
+    if fault_area_percent >= 12:
+        suggestion = "Multiple thermal hotspots detected — schedule professional thermography inspection urgently"
+    elif fault_area_percent >= 6:
+        suggestion = "Significant thermal anomaly cluster — schedule inspection within this week"
+    elif fault_area_percent >= 3:
+        suggestion = "Developing thermal hotspot — monitor closely, schedule inspection within 2 weeks"
+    else:
+        suggestion = "Thermal scan normal — minor variations within acceptable range"
+
+    # Advisory alerts
+    if risk_level == "Critical":
+        alert = {
+            "triggered": True,
+            "level": "WARNING",
+            "message": "Thermal anomaly detected — multiple hotspot regions identified",
+            "fault_type": "Thermal Anomaly",
+            "action": suggestion,
+        }
+    elif risk_level == "High":
+        alert = {
+            "triggered": True,
+            "level": "WARNING",
+            "message": "Thermal anomaly detected — significant hotspot cluster",
+            "fault_type": "Thermal Anomaly",
+            "action": suggestion,
+        }
+    elif risk_level == "Medium":
+        alert = {
+            "triggered": True,
+            "level": "INFO",
+            "message": "Developing thermal hotspot — monitor and schedule check",
+            "fault_type": "Thermal Anomaly",
+            "action": suggestion,
+        }
+    else:
+        alert = {
+            "triggered": False,
+            "level": "INFO",
+            "message": "Thermal scan acceptable",
+            "fault_type": "Normal",
+            "action": suggestion,
+        }
+
+    return {
+        "severity_score": round(severity_score, 2),
+        "risk_level": risk_level,
+        "maintenance_suggestion": suggestion,
+        "alert": alert,
+    }
+
+
+# ============================================================================
 # TEST
 # ============================================================================
 

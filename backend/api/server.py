@@ -11,7 +11,7 @@ import io
 import traceback
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI, File, UploadFile, HTTPException
+from fastapi import FastAPI, File, UploadFile, HTTPException, Form
 from fastapi.responses import JSONResponse, FileResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
@@ -26,6 +26,7 @@ from config import (
     STATIC_DIR, CLASS_NAMES,
 )
 from inference.predictor import load_model, analyze_image
+from inference.thermal_analyzer import analyze_thermal_image
 
 
 # ============================================================================
@@ -125,12 +126,15 @@ async def get_classes():
 
 
 @app.post("/analyze")
-async def analyze(file: UploadFile = File(...)):
+async def analyze(file: UploadFile = File(...), input_type: str = Form("rgb")):
     """
-    Main analysis endpoint.
+    Main analysis endpoint (supports RGB and Thermal).
 
-    Accepts: image file upload (JPG, PNG, etc.)
-    Returns: JSON with prediction, Grad-CAM, severity, risk, suggestion
+    Accepts:
+        - file: image file upload (JPG, PNG, etc.)
+        - input_type: "rgb" or "thermal" (default: "rgb")
+
+    Returns: JSON with prediction/segmentation, severity, risk, suggestion
     """
     global model_instance
 
@@ -175,40 +179,65 @@ async def analyze(file: UploadFile = File(...)):
             detail="Cannot open file as image. File may be corrupted.",
         )
 
-    # --- Run analysis ---
+    # --- Run analysis (route based on input_type) ---
     try:
-        result = analyze_image(
-            image, model=model_instance, return_base64=True
-        )
+        if input_type.lower() == "thermal":
+            # Thermal: U-Net segmentation only
+            result = analyze_thermal_image(image, return_base64=True)
+
+            response = {
+                "success": True,
+                "filename": file.filename,
+                "input_type": "thermal",
+                "analysis": {
+                    "fault_area_percent": result["fault_area_percent"],
+                    "fault_area_source": "unet_segmentation",
+                    "severity_score": result["severity_score"],
+                    "risk_level": result["risk_level"],
+                    "maintenance_suggestion": result["maintenance_suggestion"],
+                    "heat_difference": result.get("heat_difference", 0),
+                    "image_mean_intensity": result.get("image_mean_intensity", 0),
+                    "mask_mean_intensity": result.get("mask_mean_intensity", 0),
+                },
+                "alert": result["alert"],
+                "segmentation_mask": result.get("segmentation_mask_base64", None),
+                "segmentation_available": True,
+            }
+        else:
+            # RGB: Classification + Grad-CAM
+            result = analyze_image(
+                image, model=model_instance, return_base64=True
+            )
+
+            response = {
+                "success": True,
+                "filename": file.filename,
+                "input_type": "rgb",
+                "prediction": {
+                    "class_index": result["predicted_class"],
+                    "class_name": result["class_name"],
+                    "confidence": result["confidence"],
+                },
+                "class_probabilities": result.get("class_probabilities", {}),
+                "analysis": {
+                    "fault_area_percent": result["fault_area_percent"],
+                    "fault_area_source": result.get("fault_area_source", "gradcam"),
+                    "severity_score": result["severity_score"],
+                    "risk_level": result["risk_level"],
+                    "maintenance_suggestion": result["maintenance_suggestion"],
+                },
+                "alert": result["alert"],
+                "gradcam_image": result.get("gradcam_base64", None),
+                "segmentation_mask": result.get("segmentation_mask_base64", None),
+                "segmentation_available": result.get("segmentation_available", False),
+            }
+
     except Exception as e:
         traceback.print_exc()
         raise HTTPException(
             status_code=500,
             detail=f"Analysis failed: {str(e)}",
         )
-
-    # --- Build JSON response ---
-    response = {
-        "success": True,
-        "filename": file.filename,
-        "prediction": {
-            "class_index": result["predicted_class"],
-            "class_name": result["class_name"],
-            "confidence": result["confidence"],
-        },
-        "class_probabilities": result.get("class_probabilities", {}),
-        "analysis": {
-            "fault_area_percent": result["fault_area_percent"],
-            "fault_area_source": result.get("fault_area_source", "gradcam"),
-            "severity_score": result["severity_score"],
-            "risk_level": result["risk_level"],
-            "maintenance_suggestion": result["maintenance_suggestion"],
-        },
-        "alert": result["alert"],
-        "gradcam_image": result.get("gradcam_base64", None),
-        "segmentation_mask": result.get("segmentation_mask_base64", None),
-        "segmentation_available": result.get("segmentation_available", False),
-    }
 
     return JSONResponse(content=response)
 

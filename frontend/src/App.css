@@ -803,6 +803,189 @@ body {
   background: #f1f5f9;
 }
 
+/* ============= THERMAL MODULE ============= */
+
+.thermal-area-display {
+  text-align: center;
+  padding: 1rem 0;
+}
+
+.area-percentage {
+  font-size: 3.5rem;
+  font-weight: 700;
+  color: var(--primary);
+  margin-bottom: 0.5rem;
+}
+
+.area-label {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  margin-bottom: 1rem;
+}
+
+.area-bar-bg {
+  height: 16px;
+  background: #e2e8f0;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.area-bar-fill {
+  height: 100%;
+  border-radius: 8px;
+  transition: width 1s ease;
+}
+
+/* ============= DIAGNOSTIC PANEL (Thermal) ============= */
+
+.diagnostic-section {
+  margin-top: 1.5rem;
+}
+
+.diagnostic-toggle {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 0.875rem 1.25rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: var(--shadow);
+}
+
+.diagnostic-toggle:hover {
+  border-color: #94a3b8;
+  color: var(--text-primary);
+  background: #f8fafc;
+}
+
+.diagnostic-toggle.open {
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+  border-bottom-color: transparent;
+  color: var(--text-primary);
+}
+
+.diagnostic-toggle-icon {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  width: 1rem;
+  text-align: center;
+}
+
+.diagnostic-panel {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-top: none;
+  border-radius: 0 0 10px 10px;
+  padding: 1.5rem;
+  box-shadow: var(--shadow);
+  animation: fadeInUp 0.3s ease-out;
+}
+
+.diagnostic-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+}
+
+.diagnostic-cell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.diagnostic-image {
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: contain;
+  border-radius: 6px;
+  border: 1px solid #e2e8f0;
+  background: #f8fafc;
+}
+
+.diagnostic-placeholder {
+  width: 100%;
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  border: 1px dashed #cbd5e1;
+  background: #f8fafc;
+  padding: 1rem;
+  text-align: center;
+}
+
+.diagnostic-placeholder p {
+  color: #94a3b8;
+  font-size: 0.8rem;
+  font-style: italic;
+  line-height: 1.4;
+}
+
+.diagnostic-caption {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-align: center;
+}
+
+.diagnostic-legend {
+  display: flex;
+  justify-content: center;
+  gap: 1.5rem;
+  margin-top: 1.25rem;
+  padding-top: 1rem;
+  border-top: 1px solid #f1f5f9;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+}
+
+.legend-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.legend-normal {
+  background: #334155;
+}
+
+.legend-anomaly {
+  background: #f59e0b;
+}
+
+.legend-high {
+  background: #ef4444;
+}
+
+@media (max-width: 768px) {
+  .diagnostic-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 480px) {
+  .diagnostic-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
 /* Footer */
 .footer {
   background: var(--card-bg);

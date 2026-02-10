@@ -15,6 +15,7 @@ function App() {
     totalPredictions: 0,
     highRiskCount: 0,
   });
+  const [diagnosticOpen, setDiagnosticOpen] = useState(false);
 
   // Load history from localStorage on mount
   useEffect(() => {
@@ -51,7 +52,7 @@ function App() {
     multiple: false
   });
 
-  const analyzeImage = async () => {
+  const analyzeImage = async (inputType = 'rgb') => {
     if (!selectedFile) return;
 
     setLoading(true);
@@ -59,6 +60,7 @@ function App() {
 
     const formData = new FormData();
     formData.append('file', selectedFile);
+    formData.append('input_type', inputType);
 
     try {
       const response = await axios.post('/analyze', formData, {
@@ -74,15 +76,17 @@ function App() {
 
       setResult(response.data);
 
-      // Save to history
+      // Save to history (handle both RGB and thermal responses)
+      const isThermal = response.data.input_type === 'thermal';
       const newEntry = {
         timestamp: new Date().toISOString(),
         filename: selectedFile.name,
-        class_name: response.data.prediction.class_name,
-        confidence: response.data.prediction.confidence,
-        risk_level: response.data.analysis.risk_level,
-        fault_area: response.data.analysis.fault_area_percent,
-        severity: response.data.analysis.severity_score,
+        class_name: isThermal ? 'Thermal Fault' : response.data.prediction?.class_name || 'Unknown',
+        confidence: isThermal ? null : (response.data.prediction?.confidence || 0),
+        risk_level: response.data.analysis?.risk_level || 'Unknown',
+        fault_area: response.data.analysis?.fault_area_percent || 0,
+        severity: response.data.analysis?.severity_score || 0,
+        input_type: response.data.input_type || 'rgb',
       };
 
       const updatedHistory = [newEntry, ...history].slice(0, 50); // Keep last 50
@@ -108,6 +112,7 @@ function App() {
     setPreview(null);
     setResult(null);
     setError(null);
+    setDiagnosticOpen(false);
   };
 
   const getRiskColor = (riskLevel) => {
@@ -118,6 +123,8 @@ function App() {
         return '#f59e0b';
       case 'high':
         return '#ef4444';
+      case 'critical':
+        return '#991b1b';
       default:
         return '#6b7280';
     }
@@ -130,6 +137,8 @@ function App() {
       case 'medium':
         return '🟡';
       case 'high':
+        return '🔴';
+      case 'critical':
         return '🔴';
       default:
         return '⚪';
@@ -158,21 +167,21 @@ function App() {
       <nav className="nav-tabs">
         <button
           className={`tab ${activeTab === 'dashboard' ? 'active' : ''}`}
-          onClick={() => setActiveTab('dashboard')}
+          onClick={() => { resetAnalysis(); setActiveTab('dashboard'); }}
         >
           📊 Dashboard
         </button>
         <button
           className={`tab ${activeTab === 'detection' ? 'active' : ''}`}
-          onClick={() => setActiveTab('detection')}
+          onClick={() => { resetAnalysis(); setActiveTab('detection'); }}
         >
           🔍 Detection (RGB)
         </button>
         <button
-          className="tab disabled"
-          disabled
+          className={`tab ${activeTab === 'thermal' ? 'active' : ''}`}
+          onClick={() => { resetAnalysis(); setActiveTab('thermal'); }}
         >
-          🌡️ Thermal (Coming Soon)
+          🌡️ Thermal Segmentation
         </button>
       </nav>
 
@@ -239,7 +248,7 @@ function App() {
                       <div className="history-item-details">
                         <span>{entry.class_name}</span>
                         <span>•</span>
-                        <span>{(entry.confidence * 100).toFixed(1)}% confident</span>
+                        <span>{entry.confidence != null ? `${(entry.confidence * 100).toFixed(1)}% confident` : `${entry.fault_area?.toFixed(1)}% fault area`}</span>
                         <span>•</span>
                         <span>{new Date(entry.timestamp).toLocaleDateString()}</span>
                       </div>
@@ -274,8 +283,8 @@ function App() {
               </div>
             ) : (
               <div className="analysis-layout">
-                {/* Alert Banner (only for High Risk and not Clean) */}
-                {result && result.analysis.risk_level === 'High' && result.prediction.class_name !== 'Clean' && (
+                {/* Alert Banner (only for High Risk and not Clean — RGB only) */}
+                {result && result.prediction && result.analysis?.risk_level === 'High' && result.prediction?.class_name !== 'Clean' && (
                   <div className="alert-banner">
                     <span className="alert-icon">⚠️</span>
                     <div className="alert-content">
@@ -342,7 +351,7 @@ function App() {
                       </div>
                     )}
 
-                    {result && (
+                    {result && result.prediction && (
                       <>
                         {/* Prediction Card */}
                         <div className="result-card">
@@ -350,17 +359,17 @@ function App() {
                           <div className="prediction-details">
                             <div className="fault-type-display">
                               <label>Fault Type:</label>
-                              <h2 className="fault-name">{result.prediction.class_name}</h2>
+                              <h2 className="fault-name">{result.prediction?.class_name}</h2>
                             </div>
                             <div className="confidence-display">
                               <label>Confidence Score:</label>
                               <div className="confidence-bar-container">
                                 <div
                                   className="confidence-bar-fill"
-                                  style={{ width: `${(result.prediction.confidence * 100).toFixed(1)}%` }}
+                                  style={{ width: `${((result.prediction?.confidence || 0) * 100).toFixed(1)}%` }}
                                 >
                                   <span className="confidence-value">
-                                    {(result.prediction.confidence * 100).toFixed(1)}%
+                                    {((result.prediction?.confidence || 0) * 100).toFixed(1)}%
                                   </span>
                                 </div>
                               </div>
@@ -374,12 +383,12 @@ function App() {
                           <div className="metrics-grid">
                             <div className="metric-item">
                               <label>Fault Area:</label>
-                              <p className="metric-value">{result.analysis.fault_area_percent.toFixed(1)}%</p>
-                              <span className="metric-source">via {result.analysis.fault_area_source || 'grad-cam'}</span>
+                              <p className="metric-value">{result.analysis?.fault_area_percent?.toFixed(1) || '0.0'}%</p>
+                              <span className="metric-source">via {result.analysis?.fault_area_source || 'grad-cam'}</span>
                             </div>
                             <div className="metric-item">
                               <label>Severity Score:</label>
-                              <p className="metric-value">{result.analysis.severity_score.toFixed(1)}</p>
+                              <p className="metric-value">{result.analysis?.severity_score?.toFixed(1) || '0.0'}</p>
                             </div>
                           </div>
                         </div>
@@ -405,7 +414,7 @@ function App() {
                                         className="prob-bar-fill"
                                         style={{
                                           width: `${(prob * 100).toFixed(1)}%`,
-                                          background: className === result.prediction.class_name
+                                          background: className === result.prediction?.class_name
                                             ? 'linear-gradient(90deg, #3b82f6, #2563eb)'
                                             : '#cbd5e1'
                                         }}
@@ -436,12 +445,12 @@ function App() {
                           <div
                             className="risk-badge-large"
                             style={{
-                              backgroundColor: getRiskColor(result.analysis.risk_level),
-                              borderColor: getRiskColor(result.analysis.risk_level)
+                              backgroundColor: getRiskColor(result.analysis?.risk_level),
+                              borderColor: getRiskColor(result.analysis?.risk_level)
                             }}
                           >
-                            {getRiskIcon(result.analysis.risk_level)}
-                            <span>{result.analysis.risk_level} Risk</span>
+                            {getRiskIcon(result.analysis?.risk_level)}
+                            <span>{result.analysis?.risk_level || 'Unknown'} Risk</span>
                           </div>
                         </div>
 
@@ -449,7 +458,7 @@ function App() {
                         <div className="result-card suggestion-card">
                           <h3>🔧 Maintenance Recommendation</h3>
                           <p className="suggestion-text">
-                            {result.analysis.maintenance_suggestion}
+                            {result.analysis?.maintenance_suggestion || 'No recommendation available'}
                           </p>
                         </div>
 
@@ -466,15 +475,244 @@ function App() {
         )}
 
         {activeTab === 'thermal' && (
-          <div className="thermal-page">
-            <div className="placeholder-card">
-              <div className="placeholder-icon">🌡️</div>
-              <h2>Thermal Imaging Module</h2>
-              <p>Thermal segmentation module will be available in the next version.</p>
-              <p className="placeholder-hint">
-                This feature will enable infrared thermal analysis for advanced fault detection.
-              </p>
-            </div>
+          <div className="detection-page">
+            {!preview ? (
+              <div className="upload-section">
+                <div {...getRootProps()} className={`dropzone ${isDragActive ? 'active' : ''}`}>
+                  <input {...getInputProps()} />
+                  <div className="dropzone-content">
+                    <div className="upload-icon">🌡️</div>
+                    {isDragActive ? (
+                      <p>Drop the thermal image here...</p>
+                    ) : (
+                      <>
+                        <p><strong>Drag & Drop</strong> Thermal Image</p>
+                        <p className="or-text">or</p>
+                        <button type="button" className="browse-btn">Browse Files</button>
+                        <p className="hint">Upload thermal/infrared image for advisory segmentation analysis</p>
+                      </>
+                    )}
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="analysis-layout">
+                {/* Two Column Layout */}
+                <div className="two-column-layout">
+                  {/* LEFT COLUMN: Images */}
+                  <div className="left-column">
+                    <div className="image-card">
+                      <h3>Thermal Image</h3>
+                      <img src={preview} alt="Thermal scan" className="panel-image" />
+                    </div>
+
+                    {result && result.segmentation_mask && (
+                      <div className="image-card">
+                        <h3>Segmentation Overlay</h3>
+                        <p className="gradcam-hint">Red regions indicate predicted thermal anomalies</p>
+                        <img
+                          src={`data:image/png;base64,${result.segmentation_mask}`}
+                          alt="Thermal segmentation"
+                          className="panel-image"
+                        />
+                      </div>
+                    )}
+
+                    {!result && !loading && (
+                      <div className="action-buttons">
+                        <button onClick={() => analyzeImage('thermal')} className="analyze-btn">
+                          🌡️ Analyze Thermal Image
+                        </button>
+                        <button onClick={resetAnalysis} className="secondary-btn">
+                          ↺ Upload New
+                        </button>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* RIGHT COLUMN: Results */}
+                  <div className="right-column">
+                    {loading && (
+                      <div className="loading-card">
+                        <div className="spinner"></div>
+                        <p>Analyzing thermal image with U-Net...</p>
+                      </div>
+                    )}
+
+                    {error && (
+                      <div className="error-card">
+                        <h3>Analysis Failed</h3>
+                        <p>{error}</p>
+                        <button onClick={resetAnalysis} className="retry-btn">
+                          Try Again
+                        </button>
+                      </div>
+                    )}
+
+                    {result && (
+                      <>
+                        {/* Fault Area */}
+                        <div className="result-card">
+                          <h3>Thermal Fault Area</h3>
+                          <div className="thermal-area-display">
+                            <div className="area-percentage">
+                              {result.analysis.fault_area_percent.toFixed(1)}%
+                            </div>
+                            <p className="area-label">of panel flagged by segmentation</p>
+                            <div className="area-bar-bg">
+                              <div
+                                className="area-bar-fill"
+                                style={{
+                                  width: `${Math.min(result.analysis.fault_area_percent, 100)}%`,
+                                  background: result.analysis.fault_area_percent >= 12
+                                    ? 'linear-gradient(90deg, #ef4444, #dc2626)'
+                                    : result.analysis.fault_area_percent >= 6
+                                    ? 'linear-gradient(90deg, #f59e0b, #d97706)'
+                                    : result.analysis.fault_area_percent >= 3
+                                    ? 'linear-gradient(90deg, #fb923c, #f97316)'
+                                    : 'linear-gradient(90deg, #10b981, #059669)'
+                                }}
+                              />
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Analysis Metrics */}
+                        <div className="result-card">
+                          <h3>Analysis Metrics</h3>
+                          <div className="metrics-grid">
+                            <div className="metric-item">
+                              <label>Severity Score:</label>
+                              <p className="metric-value">{result.analysis.severity_score.toFixed(1)}</p>
+                            </div>
+                            <div className="metric-item">
+                              <label>Heat Difference:</label>
+                              <p className="metric-value">
+                                {result.analysis.heat_difference != null
+                                  ? `${result.analysis.heat_difference.toFixed(1)}`
+                                  : 'N/A'}
+                                {result.analysis.heat_difference != null && result.analysis.heat_difference < 10 && (
+                                  <span style={{fontSize: '0.75rem', color: '#6b7280', marginLeft: '4px'}}>(low contrast)</span>
+                                )}
+                              </p>
+                            </div>
+                            <div className="metric-item">
+                              <label>Image Mean Intensity:</label>
+                              <p className="metric-value">
+                                {result.analysis.image_mean_intensity != null
+                                  ? result.analysis.image_mean_intensity.toFixed(1)
+                                  : 'N/A'}
+                              </p>
+                            </div>
+                            <div className="metric-item">
+                              <label>Mask Mean Intensity:</label>
+                              <p className="metric-value">
+                                {result.analysis.mask_mean_intensity != null
+                                  ? result.analysis.mask_mean_intensity.toFixed(1)
+                                  : 'N/A'}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Risk Badge */}
+                        <div className="result-card">
+                          <h3>Risk Assessment</h3>
+                          <div
+                            className="risk-badge-large"
+                            style={{
+                              backgroundColor: getRiskColor(result.analysis.risk_level),
+                              borderColor: getRiskColor(result.analysis.risk_level)
+                            }}
+                          >
+                            {getRiskIcon(result.analysis.risk_level)}
+                            <span>{result.analysis.risk_level} Risk</span>
+                          </div>
+                          <p className="card-hint" style={{marginTop: '8px', fontSize: '0.8rem', color: '#6b7280'}}>
+                            Advisory only — verify with on-site inspection
+                          </p>
+                        </div>
+
+                        {/* Maintenance Suggestion */}
+                        <div className="result-card suggestion-card">
+                          <h3>Maintenance Suggestion</h3>
+                          <p className="suggestion-text">
+                            {result.analysis.maintenance_suggestion}
+                          </p>
+                        </div>
+
+                        <button onClick={resetAnalysis} className="new-analysis-btn">
+                          ↺ Analyze Another Thermal Image
+                        </button>
+                      </>
+                    )}
+                  </div>
+                </div>
+
+                {/* Diagnostic Panel — collapsible, read-only, does NOT affect alerts/risk */}
+                {result && result.segmentation_mask && (
+                  <div className="diagnostic-section">
+                    <button
+                      className={`diagnostic-toggle ${diagnosticOpen ? 'open' : ''}`}
+                      onClick={() => setDiagnosticOpen(!diagnosticOpen)}
+                    >
+                      <span className="diagnostic-toggle-icon">{diagnosticOpen ? '▾' : '▸'}</span>
+                      <span>Segmentation Details (Diagnostic View)</span>
+                    </button>
+
+                    {diagnosticOpen && (
+                      <div className="diagnostic-panel">
+                        <div className="diagnostic-grid">
+                          {/* Column 1: Original Image */}
+                          <div className="diagnostic-cell">
+                            <img
+                              src={preview}
+                              alt="Original thermal"
+                              className="diagnostic-image"
+                            />
+                            <p className="diagnostic-caption">Original Image</p>
+                          </div>
+
+                          {/* Column 2: Ground Truth */}
+                          <div className="diagnostic-cell">
+                            <div className="diagnostic-placeholder">
+                              <p>Ground truth not available for live inference</p>
+                            </div>
+                            <p className="diagnostic-caption">Ground Truth Mask</p>
+                          </div>
+
+                          {/* Column 3: Predicted Mask */}
+                          <div className="diagnostic-cell">
+                            <img
+                              src={`data:image/png;base64,${result.segmentation_mask}`}
+                              alt="Predicted mask"
+                              className="diagnostic-image"
+                            />
+                            <p className="diagnostic-caption">Predicted Mask (U-Net)</p>
+                          </div>
+
+                          {/* Column 4: Overlay */}
+                          <div className="diagnostic-cell">
+                            <img
+                              src={`data:image/png;base64,${result.segmentation_mask}`}
+                              alt="Overlay visualization"
+                              className="diagnostic-image"
+                            />
+                            <p className="diagnostic-caption">Overlay</p>
+                          </div>
+                        </div>
+
+                        <div className="diagnostic-legend">
+                          <span className="legend-item"><span className="legend-dot legend-normal"></span> Normal</span>
+                          <span className="legend-item"><span className="legend-dot legend-anomaly"></span> Anomaly</span>
+                          <span className="legend-item"><span className="legend-dot legend-high"></span> High-Confidence Region</span>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         )}
       </main>

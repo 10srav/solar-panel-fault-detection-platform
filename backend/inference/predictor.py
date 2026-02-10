@@ -25,7 +25,7 @@ from explainability.segmentation import (
     generate_segmentation_mask,
     estimate_fault_area_from_mask,
 )
-from risk_engine.severity_analysis import full_risk_analysis, print_alert
+from risk_engine.severity_analysis import full_risk_analysis, print_alert, thermal_risk_analysis
 
 
 # ============================================================================
