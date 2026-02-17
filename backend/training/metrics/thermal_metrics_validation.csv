@@ -1,0 +1,24 @@
+Metric,Value
+num_images,102
+dice_mean,0.596373
+dice_std,0.274032
+dice_median,0.683896
+iou_mean,0.475161
+iou_std,0.260864
+iou_median,0.519637
+precision_macro,0.637876
+recall_macro,0.729007
+f1_macro,0.596373
+accuracy_macro,0.838360
+specificity_macro,0.894936
+precision_micro,0.718024
+recall_micro,0.690166
+f1_micro,0.703819
+accuracy_micro,0.838360
+
+Pixel Counts,
+True Positives,1283822
+False Positives,504170
+False Negatives,576343
+True Negatives,4320337
+Total Pixels,6684672

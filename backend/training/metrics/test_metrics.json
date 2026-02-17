@@ -1,0 +1,58 @@
+{
+  "accuracy": 0.909271523178808,
+  "precision_macro": 0.9163920833127873,
+  "precision_weighted": 0.9082202171738959,
+  "recall_macro": 0.9142053153143276,
+  "recall_weighted": 0.909271523178808,
+  "f1_macro": 0.91463730829941,
+  "f1_weighted": 0.9080590578791983,
+  "per_class": {
+    "Bird_drop_generateds": {
+      "precision": 0.8863636363636364,
+      "recall": 0.9479166666666666,
+      "f1_score": 0.9161073825503355,
+      "support": 288
+    },
+    "Clean": {
+      "precision": 0.869942196531792,
+      "recall": 0.8958333333333334,
+      "f1_score": 0.8826979472140762,
+      "support": 336
+    },
+    "Dusty": {
+      "precision": 0.8071748878923767,
+      "recall": 0.72,
+      "f1_score": 0.7610993657505285,
+      "support": 250
+    },
+    "Electrical_damage_generated": {
+      "precision": 0.9751243781094527,
+      "recall": 0.98989898989899,
+      "f1_score": 0.9824561403508771,
+      "support": 198
+    },
+    "Physcial_damage_generated": {
+      "precision": 0.9646017699115044,
+      "recall": 0.9646017699115044,
+      "f1_score": 0.9646017699115044,
+      "support": 226
+    },
+    "Snow_covered_generated": {
+      "precision": 0.9951456310679612,
+      "recall": 0.9669811320754716,
+      "f1_score": 0.9808612440191388,
+      "support": 212
+    }
+  },
+  "evaluation_date": "2026-02-17T09:16:54.474430",
+  "model_path": "C:\\Users\\BALU\\OneDrive\\Desktop\\solar_panel\\backend\\models\\rgb_fault_model.pth",
+  "dataset_path": "C:\\Users\\BALU\\OneDrive\\Desktop\\solar_panel\\dataset\\PRoject",
+  "total_samples_evaluated": 1510,
+  "correct_predictions": 1373,
+  "incorrect_predictions": 137,
+  "split_seed": 42,
+  "split_ratio": 0.8,
+  "checkpoint_val_acc": 90.9271523178808,
+  "checkpoint_epoch": 2,
+  "device": "cuda"
+}

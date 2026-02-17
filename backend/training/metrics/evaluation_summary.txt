@@ -1,0 +1,182 @@
+======================================================================
+ SOLAR PANEL FAULT DETECTION — MODEL EVALUATION REPORT
+ Generated: 2026-02-17 09:16:56
+======================================================================
+
+MODEL CHECKPOINT INFO
+----------------------------------------
+  Model file     : C:\Users\BALU\OneDrive\Desktop\solar_panel\backend\models\rgb_fault_model.pth
+  Best epoch     : 2
+  Training val_acc: 90.9271523178808%
+
+DATASET SPLIT
+----------------------------------------
+  Dataset path   : C:\Users\BALU\OneDrive\Desktop\solar_panel\dataset\PRoject
+  Total images   : 7547
+  Training set   : 6037 (80%)
+  Validation set : 1510 (20%)
+  Split seed     : 42
+
+VALIDATION SET RESULTS
+----------------------------------------
+  Accuracy       : 90.93% (1373/1510 correct)
+  Misclassified  : 137 samples
+  Precision (macro)  : 91.64%
+  Recall (macro)     : 91.42%
+  F1-Score (macro)   : 91.46%
+  F1-Score (weighted): 90.81%
+
+PER-CLASS METRICS
+----------------------------------------------------------------------
+  Class                           Precision     Recall         F1    Support
+  --------------------------------------------------------------------
+  Bird_drop_generateds               88.64%     94.79%     91.61%        288
+  Clean                              86.99%     89.58%     88.27%        336
+  Dusty                              80.72%     72.00%     76.11%        250
+  Electrical_damage_generated        97.51%     98.99%     98.25%        198
+  Physcial_damage_generated          96.46%     96.46%     96.46%        226
+  Snow_covered_generated             99.51%     96.70%     98.09%        212
+
+MISCLASSIFIED SAMPLES
+----------------------------------------------------------------------
+  Imgclean_373_0.jpg                       True: Clean                          Pred: Dusty                          Conf: 48.64%
+  Electrical (4)_aug_2.jpg                 True: Electrical_damage_generated    Pred: Clean                          Conf: 80.30%
+  Imgclean_1019_0.jpg                      True: Clean                          Pred: Dusty                          Conf: 57.98%
+  Imgdirty_219_1.jpg                       True: Dusty                          Pred: Electrical_damage_generated    Conf: 66.51%
+  Imgdirty_634_1.jpg                       True: Dusty                          Pred: Clean                          Conf: 48.12%
+  Imgdirty_168_1.jpg                       True: Dusty                          Pred: Clean                          Conf: 95.66%
+  Physical (20)_aug_9.jpg                  True: Physcial_damage_generated      Pred: Bird_drop_generateds           Conf: 75.51%
+  Imgclean_925_0.jpg                       True: Clean                          Pred: Dusty                          Conf: 68.20%
+  Imgdirty_689_1.jpg                       True: Dusty                          Pred: Bird_drop_generateds           Conf: 76.31%
+  Imgclean_331_0.jpg                       True: Clean                          Pred: Dusty                          Conf: 90.99%
+  Imgclean_895_0.jpg                       True: Clean                          Pred: Snow_covered_generated         Conf: 93.14%
+  Imgdirty_32_1.jpg                        True: Dusty                          Pred: Clean                          Conf: 94.09%
+  Imgdirty_376_1.jpg                       True: Dusty                          Pred: Bird_drop_generateds           Conf: 71.04%
+  Imgclean_610_0.jpg                       True: Clean                          Pred: Dusty                          Conf: 64.86%
+  Imgclean_1482_0.jpg                      True: Clean                          Pred: Bird_drop_generateds           Conf: 72.20%
+  dirty-rooftop-solar-panels-covered-260nw-2504133283_aug_4.jpg True: Bird_drop_generateds           Pred: Physcial_damage_generated      Conf: 54.23%
+  Imgdirty_723_1.jpg                       True: Dusty                          Pred: Bird_drop_generateds           Conf: 69.92%
+  Imgdirty_736_1.jpg                       True: Dusty                          Pred: Clean                          Conf: 82.57%
+  Imgdirty_60_1.jpg                        True: Dusty                          Pred: Clean                          Conf: 83.96%
+  Imgclean_929_0.jpg                       True: Clean                          Pred: Dusty                          Conf: 67.86%
+  Bird (106)_aug_2.jpg                     True: Bird_drop_generateds           Pred: Dusty                          Conf: 59.21%
+  Bird (191)_aug_0.jpg                     True: Bird_drop_generateds           Pred: Electrical_damage_generated    Conf: 64.84%
+  Imgclean_1434_0.jpg                      True: Clean                          Pred: Dusty                          Conf: 84.71%
+  Imgdirty_921_1.jpg                       True: Dusty                          Pred: Clean                          Conf: 66.02%
+  Imgclean_732_0.jpg                       True: Clean                          Pred: Dusty                          Conf: 63.90%
+  Electrical (4)_aug_2 - Copy.jpg          True: Electrical_damage_generated    Pred: Clean                          Conf: 80.30%
+  Imgdirty_949_1.jpg                       True: Dusty                          Pred: Physcial_damage_generated      Conf: 51.68%
+  Imgdirty_692_1.jpg                       True: Dusty                          Pred: Bird_drop_generateds           Conf: 56.19%
+  dirty-rooftop-solar-panels-covered-260nw-2497687683_aug_2.jpg True: Bird_drop_generateds           Pred: Physcial_damage_generated      Conf: 50.22%
+  Imgdirty_107_1.jpg                       True: Dusty                          Pred: Clean                          Conf: 85.54%
+  Imgdirty_996_1.jpg                       True: Dusty                          Pred: Clean                          Conf: 43.70%
+  Imgclean_1431_0.jpg                      True: Clean                          Pred: Dusty                          Conf: 84.02%
+  Imgclean_415_0.jpg                       True: Clean                          Pred: Dusty                          Conf: 51.01%
+  Clean (7).jpg                            True: Clean                          Pred: Dusty                          Conf: 52.17%
+  Imgdirty_833_1.jpg                       True: Dusty                          Pred: Bird_drop_generateds           Conf: 98.12%
+  Imgclean_536_0.jpg                       True: Clean                          Pred: Dusty                          Conf: 69.90%
+  Imgdirty_471_1.jpg                       True: Dusty                          Pred: Clean                          Conf: 69.19%
+  snowcovered-solar-panels-on-rooftop-260nw-2570813233_aug_3.jpg True: Snow_covered_generated         Pred: Dusty                          Conf: 51.64%
+  Imgclean_19_0.jpg                        True: Clean                          Pred: Dusty                          Conf: 36.15%
+  snowcovered-solar-panels-during-cold-260nw-2586069141_aug_2.jpg True: Snow_covered_generated         Pred: Physcial_damage_generated      Conf: 55.62%
+  Imgdirty_821_1.jpg                       True: Dusty                          Pred: Bird_drop_generateds           Conf: 76.80%
+  Imgclean_1472_0.jpg                      True: Clean                          Pred: Dusty                          Conf: 85.27%
+  Imgdirty_88_1.jpg                        True: Dusty                          Pred: Clean                          Conf: 89.61%
+  Imgclean_720_0.jpg                       True: Clean                          Pred: Dusty                          Conf: 38.14%
+  three-big-dents-hail-on-260nw-2535523971_aug_2.jpg True: Physcial_damage_generated      Pred: Electrical_damage_generated    Conf: 36.99%
+  Physical (51)_aug_4.jpg                  True: Physcial_damage_generated      Pred: Bird_drop_generateds           Conf: 98.95%
+  Bird (80)_aug_3.jpg                      True: Bird_drop_generateds           Pred: Dusty                          Conf: 71.13%
+  Imgdirty_24_1.jpg                        True: Dusty                          Pred: Bird_drop_generateds           Conf: 35.47%
+  Imgdirty_374_1.jpg                       True: Dusty                          Pred: Clean                          Conf: 84.99%
+  Imgdirty_316_1.jpg                       True: Dusty                          Pred: Bird_drop_generateds           Conf: 97.68%
+  Imgdirty_779_1.jpg                       True: Dusty                          Pred: Bird_drop_generateds           Conf: 72.23%
+  Bird (99)_aug_0.jpg                      True: Bird_drop_generateds           Pred: Dusty                          Conf: 74.61%
+  Imgdirty_193_1.jpg                       True: Dusty                          Pred: Clean                          Conf: 76.18%
+  Imgclean_1005_0.jpg                      True: Clean                          Pred: Dusty                          Conf: 53.71%
+  Imgdirty_791_1.jpg                       True: Dusty                          Pred: Bird_drop_generateds           Conf: 92.95%
+  Imgdirty_764_1.jpg                       True: Dusty                          Pred: Bird_drop_generateds           Conf: 99.76%
+  Imgdirty_1060_1.jpg                      True: Dusty                          Pred: Bird_drop_generateds           Conf: 55.08%
+  Imgclean_396_0.jpg                       True: Clean                          Pred: Dusty                          Conf: 57.35%
+  Dust (40).jpg                            True: Dusty                          Pred: Electrical_damage_generated    Conf: 66.51%
+  Imgdirty_721_1.jpg                       True: Dusty                          Pred: Bird_drop_generateds           Conf: 63.28%
+  Bird (3)_aug_2.jpg                       True: Bird_drop_generateds           Pred: Dusty                          Conf: 43.02%
+  Imgdirty_306_1.jpg                       True: Dusty                          Pred: Clean                          Conf: 86.81%
+  Physical (66)_aug_9.jpg                  True: Physcial_damage_generated      Pred: Dusty                          Conf: 77.79%
+  Imgclean_1328_0.jpg                      True: Clean                          Pred: Dusty                          Conf: 88.89%
+  Imgclean_942_0.jpg                       True: Clean                          Pred: Dusty                          Conf: 56.39%
+  Bird (162)_aug_2.jpg                     True: Bird_drop_generateds           Pred: Dusty                          Conf: 67.53%
+  Imgclean_1373_0.jpg                      True: Clean                          Pred: Dusty                          Conf: 71.98%
+  Imgdirty_969_1.jpg                       True: Dusty                          Pred: Clean                          Conf: 55.34%
+  Snow (108)_aug_1.jpg                     True: Snow_covered_generated         Pred: Clean                          Conf: 68.61%
+  Imgdirty_184_1.jpg                       True: Dusty                          Pred: Clean                          Conf: 56.69%
+  Imgclean_1458_0.jpg                      True: Clean                          Pred: Dusty                          Conf: 93.97%
+  16_aug_4.jpg                             True: Bird_drop_generateds           Pred: Clean                          Conf: 55.34%
+  Imgdirty_897_1.jpg                       True: Dusty                          Pred: Physcial_damage_generated      Conf: 51.68%
+  Imgclean_1456_0.jpg                      True: Clean                          Pred: Dusty                          Conf: 75.21%
+  Imgdirty_379_1.jpg                       True: Dusty                          Pred: Clean                          Conf: 98.44%
+  Imgdirty_303_1.jpg                       True: Dusty                          Pred: Clean                          Conf: 83.38%
+  Bird (59)_aug_0.jpg                      True: Bird_drop_generateds           Pred: Physcial_damage_generated      Conf: 61.21%
+  Imgclean_1073_0.jpg                      True: Clean                          Pred: Dusty                          Conf: 68.78%
+  Imgdirty_762_1.jpg                       True: Dusty                          Pred: Clean                          Conf: 84.14%
+  Imgdirty_413_1.jpg                       True: Dusty                          Pred: Clean                          Conf: 64.63%
+  Imgdirty_172_1.jpg                       True: Dusty                          Pred: Clean                          Conf: 83.21%
+  Imgclean_374_0.jpg                       True: Clean                          Pred: Electrical_damage_generated    Conf: 62.01%
+  Imgdirty_194_1.jpg                       True: Dusty                          Pred: Bird_drop_generateds           Conf: 75.08%
+  Imgdirty_1003_1.jpg                      True: Dusty                          Pred: Clean                          Conf: 97.96%
+  Imgclean_938_0.jpg                       True: Clean                          Pred: Dusty                          Conf: 49.99%
+  Imgdirty_98_1.jpg                        True: Dusty                          Pred: Clean                          Conf: 83.72%
+  Imgclean_478_0.jpg                       True: Clean                          Pred: Dusty                          Conf: 70.82%
+  Imgdirty_274_1.jpg                       True: Dusty                          Pred: Bird_drop_generateds           Conf: 51.28%
+  Imgdirty_45_1.jpg                        True: Dusty                          Pred: Clean                          Conf: 72.59%
+  Imgdirty_535_1.jpg                       True: Dusty                          Pred: Bird_drop_generateds           Conf: 92.16%
+  Imgdirty_682_1.jpg                       True: Dusty                          Pred: Bird_drop_generateds           Conf: 88.43%
+  Snow (121)_aug_4.jpg                     True: Snow_covered_generated         Pred: Physcial_damage_generated      Conf: 40.61%
+  Imgdirty_983_1.jpg                       True: Dusty                          Pred: Clean                          Conf: 75.89%
+  Imgclean_1489_0.jpg                      True: Clean                          Pred: Dusty                          Conf: 97.46%
+  Imgdirty_100_1.jpg                       True: Dusty                          Pred: Clean                          Conf: 97.18%
+  snowy-solar-panels-on-roof-260nw-186955757_aug_0.jpg True: Snow_covered_generated         Pred: Bird_drop_generateds           Conf: 61.55%
+  Bird (80)_aug_4.jpg                      True: Bird_drop_generateds           Pred: Dusty                          Conf: 66.89%
+  Imgdirty_935_1.jpg                       True: Dusty                          Pred: Bird_drop_generateds           Conf: 69.44%
+  Imgdirty_104_1.jpg                       True: Dusty                          Pred: Clean                          Conf: 78.21%
+  Imgclean_1447_0.jpg                      True: Clean                          Pred: Bird_drop_generateds           Conf: 35.75%
+  Imgdirty_160_1.jpg                       True: Dusty                          Pred: Clean                          Conf: 69.37%
+  Imgdirty_901_1.jpg                       True: Dusty                          Pred: Bird_drop_generateds           Conf: 63.00%
+  Imgclean_628_0.jpg                       True: Clean                          Pred: Dusty                          Conf: 51.32%
+  Imgdirty_176_1.jpg                       True: Dusty                          Pred: Clean                          Conf: 75.70%
+  Physical (37)_aug_5.jpg                  True: Physcial_damage_generated      Pred: Bird_drop_generateds           Conf: 85.11%
+  detail-solar-panels-damaged-by-260nw-1799972737_aug_7.jpg True: Physcial_damage_generated      Pred: Bird_drop_generateds           Conf: 63.00%
+  Imgdirty_953_1.jpg                       True: Dusty                          Pred: Bird_drop_generateds           Conf: 94.37%
+  Bird (3)_aug_0.jpg                       True: Bird_drop_generateds           Pred: Dusty                          Conf: 73.00%
+  Imgclean_703_0.jpg                       True: Clean                          Pred: Dusty                          Conf: 67.01%
+  Imgclean_427_0.jpg                       True: Clean                          Pred: Dusty                          Conf: 71.94%
+  Imgdirty_824_1.jpg                       True: Dusty                          Pred: Clean                          Conf: 97.09%
+  Snow (121)_aug_0.jpg                     True: Snow_covered_generated         Pred: Physcial_damage_generated      Conf: 43.68%
+  Imgdirty_899_1.jpg                       True: Dusty                          Pred: Clean                          Conf: 66.02%
+  Imgdirty_134_1.jpg                       True: Dusty                          Pred: Bird_drop_generateds           Conf: 50.04%
+  Imgdirty_103_1.jpg                       True: Dusty                          Pred: Clean                          Conf: 96.27%
+  Dust (76).jpg                            True: Dusty                          Pred: Clean                          Conf: 89.67%
+  Imgclean_838_0.jpg                       True: Clean                          Pred: Dusty                          Conf: 51.22%
+  Snow (27)_aug_3.jpg                      True: Snow_covered_generated         Pred: Bird_drop_generateds           Conf: 65.13%
+  Imgdirty_154_1.jpg                       True: Dusty                          Pred: Bird_drop_generateds           Conf: 67.25%
+  solar-panels-visible-hail-damage-260nw-2495884713_aug_8.jpg True: Physcial_damage_generated      Pred: Bird_drop_generateds           Conf: 42.09%
+  broken-solar-panels-on-white-260nw-2493354607_aug_2.jpg True: Physcial_damage_generated      Pred: Clean                          Conf: 45.10%
+  Imgdirty_375_1.jpg                       True: Dusty                          Pred: Clean                          Conf: 50.79%
+  Imgdirty_111_1.jpg                       True: Dusty                          Pred: Clean                          Conf: 67.21%
+  Imgdirty_997_1.jpg                       True: Dusty                          Pred: Clean                          Conf: 80.55%
+  Imgdirty_77_1.jpg                        True: Dusty                          Pred: Bird_drop_generateds           Conf: 76.98%
+  Imgdirty_781_1.jpg                       True: Dusty                          Pred: Clean                          Conf: 78.78%
+  Bird (3)_aug_3.jpg                       True: Bird_drop_generateds           Pred: Dusty                          Conf: 46.47%
+  Bird (3)_aug_1.jpg                       True: Bird_drop_generateds           Pred: Dusty                          Conf: 68.65%
+  Imgdirty_57_1.jpg                        True: Dusty                          Pred: Clean                          Conf: 83.96%
+  Imgdirty_893_1.jpg                       True: Dusty                          Pred: Bird_drop_generateds           Conf: 93.34%
+  Imgdirty_126_1.jpg                       True: Dusty                          Pred: Clean                          Conf: 85.35%
+  Imgdirty_665_1.jpg                       True: Dusty                          Pred: Clean                          Conf: 78.33%
+  Imgdirty_1009_1.jpg                      True: Dusty                          Pred: Bird_drop_generateds           Conf: 67.43%
+  Dust (20).jpg                            True: Dusty                          Pred: Bird_drop_generateds           Conf: 50.04%
+  Imgclean_753_0.jpg                       True: Clean                          Pred: Dusty                          Conf: 49.08%
+  Bird (29)_aug_1.jpg                      True: Bird_drop_generateds           Pred: Dusty                          Conf: 71.10%
+  Imgdirty_999_1.jpg                       True: Dusty                          Pred: Clean                          Conf: 45.98%
+
+======================================================================
+ END OF EVALUATION REPORT
+======================================================================

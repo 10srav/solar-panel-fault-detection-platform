@@ -1,0 +1,71 @@
+======================================================================
+ THERMAL U-NET SEGMENTATION — MODEL EVALUATION REPORT
+ Generated: 2026-02-17 09:24:29
+======================================================================
+
+MODEL CHECKPOINT INFO
+----------------------------------------
+  Model file       : C:\Users\BALU\OneDrive\Desktop\solar_panel\backend\models\thermal_segmentation_unet_v2.pth
+  Architecture     : U-Net (3-channel input, 1-channel output)
+  Task             : Binary Segmentation (Fault vs Background)
+  Best epoch       : 40
+  Checkpoint Dice  : 0.5963 (59.63%)
+  Checkpoint IoU   : 0.4751 (47.51%)
+
+VALIDATION SET RESULTS (102 images)
+------------------------------------------------------------
+  Dice Score (mean ± std) : 59.64% ± 27.40%
+  Dice Score (median)     : 68.39%
+  IoU (mean ± std)        : 47.52% ± 26.09%
+  IoU (median)            : 51.96%
+
+  Pixel-Level Metrics (Macro — per-image average):
+    Precision     : 63.79%
+    Recall        : 72.90%
+    F1-Score      : 59.64%
+    Accuracy      : 83.84%
+    Specificity   : 89.49%
+
+  Pixel-Level Metrics (Micro — total pixel counts):
+    Precision     : 71.80%
+    Recall        : 69.02%
+    F1-Score      : 70.38%
+    Accuracy      : 83.84%
+
+  Pixel Counts:
+    True Positives  :    1,283,822
+    False Positives :      504,170
+    False Negatives :      576,343
+    True Negatives  :    4,320,337
+    Total Pixels    :    6,684,672
+
+TEST SET RESULTS (62 images)
+------------------------------------------------------------
+  Dice Score (mean ± std) : 55.41% ± 27.72%
+  Dice Score (median)     : 61.97%
+  IoU (mean ± std)        : 43.19% ± 25.75%
+  IoU (median)            : 44.90%
+
+  Pixel-Level Metrics (Macro — per-image average):
+    Precision     : 57.33%
+    Recall        : 76.51%
+    F1-Score      : 55.41%
+    Accuracy      : 83.95%
+    Specificity   : 86.44%
+
+  Pixel-Level Metrics (Micro — total pixel counts):
+    Precision     : 62.26%
+    Recall        : 74.30%
+    F1-Score      : 67.75%
+    Accuracy      : 83.95%
+
+  Pixel Counts:
+    True Positives  :      685,135
+    False Positives :      415,313
+    False Negatives :      236,937
+    True Negatives  :    2,725,847
+    Total Pixels    :    4,063,232
+
+======================================================================
+ END OF THERMAL EVALUATION REPORT
+======================================================================

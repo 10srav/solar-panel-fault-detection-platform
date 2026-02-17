@@ -1,0 +1,31 @@
+Thermal U-Net Segmentation — Classification Report
+Generated: 2026-02-17 09:24:29
+Model: C:\Users\BALU\OneDrive\Desktop\solar_panel\backend\models\thermal_segmentation_unet_v2.pth
+Threshold: 0.5
+
+==================================================
+ VALIDATION SET (102 images)
+==================================================
+
+  Metric                         Macro      Micro
+  ---------------------------------------------
+  Dice Score                    59.64%       —
+  IoU                           47.52%       —
+  Precision                     63.79%     71.80%
+  Recall                        72.90%     69.02%
+  F1-Score                      59.64%     70.38%
+  Pixel Accuracy                83.84%     83.84%
+
+==================================================
+ TEST SET (62 images)
+==================================================
+
+  Metric                         Macro      Micro
+  ---------------------------------------------
+  Dice Score                    55.41%       —
+  IoU                           43.19%       —
+  Precision                     57.33%     62.26%
+  Recall                        76.51%     74.30%
+  F1-Score                      55.41%     67.75%
+  Pixel Accuracy                83.95%     83.95%
+
